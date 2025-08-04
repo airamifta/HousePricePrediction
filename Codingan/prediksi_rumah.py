@@ -1,0 +1,124 @@
+import streamlit as st
+import pandas as pd
+import joblib
+import pydeck as pdk
+
+# Konfigurasi Halaman
+st.set_page_config(
+    page_title="Prediksi Harga Rumah",
+    page_icon="🏡",
+    layout="centered",
+    initial_sidebar_state="auto"
+)
+
+# Fungsi untuk Memuat Model dan Scaler
+@st.cache_resource
+def load_model_and_scaler():
+    model = joblib.load("model_rumah.pkl")
+    scaler = joblib.load("scaler_rumah.pkl")
+    return model, scaler
+
+# Fungsi untuk Prediksi
+def predict_price(model, scaler, input_data):
+    selected_features = ['view', 'condition', 'grade']
+    input_data[selected_features] = scaler.transform(input_data[selected_features])
+    prediction = model.predict(input_data)[0]
+    return int(prediction)
+
+# UI Streamlit
+st.title("🏡 Prediksi Harga Rumah")
+st.write(
+    "Masukkan detail properti rumah di bawah ini untuk memprediksi harga estimasi rumah "
+    "berdasarkan model machine learning regresi yang telah dilatih."
+)
+
+# Muat model dan scaler
+model, scaler = load_model_and_scaler()
+
+# Form Input
+with st.form("form_prediksi"):
+    st.header("Masukkan Detail Rumah Anda")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        bedrooms = st.number_input("🛏️ Jumlah Kamar Tidur", min_value=0, max_value=40, value=3)
+        bathrooms = st.number_input("🛁 Jumlah Kamar Mandi", min_value=0.0, max_value=15.0, value=2.0, step=0.25)
+        sqft_living = st.number_input("🏠 Luas Bangunan (sqft)", min_value=10, max_value=100000, value=2000)
+        sqft_lot = st.number_input("🌳 Luas Tanah (sqft)", min_value=10, max_value=100000, value=5000)
+        floors = st.number_input("🏢 Jumlah Lantai", min_value=1.0, max_value=10.0, value=1.0, step=0.25)
+        waterfront = st.selectbox("🌊 Menghadap Laut?", [0, 1])
+        view = st.slider("👀 Pemandangan (0-4)", 0, 4, 0)
+        condition = st.slider("🧱 Kondisi Rumah (1-5)", 1, 5, 3)
+        grade = st.slider("🏗️ Kualitas Bangunan (1-13)", 1, 13, 7)
+
+    with col2:
+        sqft_above = st.number_input("⬆️ Luas Lantai Atas", min_value=10, max_value=100000, value=1800)
+        sqft_basement = st.number_input("⬇️ Luas Basement", min_value=10, max_value=100000, value=200)
+        yr_built = st.number_input("🏗️ Tahun Dibangun", min_value=1800, max_value=2025, value=1990)
+        yr_renovated = st.number_input("🔧 Tahun Renovasi (0 jika belum)", min_value=0, max_value=2025, value=0)
+        zipcode = st.number_input("📮 Kode Pos", min_value=97000, max_value=99000, value=98178)
+        lat = st.number_input("🌐 Latitude", min_value=40.0, max_value=55.0, format="%.6f", value=47.5112)
+        long = st.number_input("🌐 Longitude", min_value=-150.0, max_value=-100.0, format="%.6f", value=-122.257)
+        sqft_living15 = st.number_input("📏 Luas Rata-rata Rumah Sekitar", min_value=10, max_value=10000, value=1500)
+        sqft_lot15 = st.number_input("📏 Luas Rata-rata Tanah Sekitar", min_value=10, max_value=999000, value=4000)
+
+    submit_button = st.form_submit_button(label="🔍 Prediksi Harga", use_container_width=True)
+
+# Logika Prediksi
+if submit_button:
+    input_dict = {
+        'bedrooms': bedrooms,
+        'bathrooms': bathrooms,
+        'sqft_living': sqft_living,
+        'sqft_lot': sqft_lot,
+        'floors': floors,
+        'waterfront': waterfront,
+        'view': view,
+        'condition': condition,
+        'grade': grade,
+        'sqft_above': sqft_above,
+        'sqft_basement': sqft_basement,
+        'yr_built': yr_built,
+        'yr_renovated': yr_renovated,
+        'zipcode': zipcode,
+        'lat': lat,
+        'long': long,
+        'sqft_living15': sqft_living15,
+        'sqft_lot15': sqft_lot15
+    }
+
+    input_df = pd.DataFrame([input_dict])
+
+    try:
+        estimated_price = predict_price(model, scaler, input_df)
+        estimated_price_idr = estimated_price * 16380  # Konversi ke Rupiah
+
+        st.subheader("Hasil Prediksi Harga Rumah Anda:")
+        st.metric(label="💰 Perkiraan Harga", value=f"${estimated_price:,}")
+        st.info(f"Jika dikonversi, harga ini setara dengan sekitar **Rp{estimated_price_idr:,}** "
+                f"(berdasarkan kurs Rp16.380 per USD).")
+
+        # Peta Lokasi
+        st.subheader("📍 Lokasi Rumah di Peta")
+        map_data = pd.DataFrame({'lat': [lat], 'lon': [long]})
+        st.pydeck_chart(pdk.Deck(
+            map_style="mapbox://styles/mapbox/streets-v11",
+            initial_view_state=pdk.ViewState(
+                latitude=lat,
+                longitude=long,
+                zoom=12,
+                pitch=0,
+            ),
+            layers=[
+                pdk.Layer(
+                    "ScatterplotLayer",
+                    data=map_data,
+                    get_position='[lon, lat]',
+                    get_color='[0, 128, 255, 160]',
+                    get_radius=200,
+                ),
+            ],
+        ))
+
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat prediksi: {e}")
