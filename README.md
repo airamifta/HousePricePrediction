@@ -11,7 +11,7 @@ Aplikasi prediksi harga rumah di Amerika Serikat menggunakan model Machine Learn
 
 ## 🔗 Demo
 
-🌐 Coba aplikasinya langsung di: [https://housepriceprediction-1450614579.streamlit.app/](https://housepriceprediction-1450614579.streamlit.app/)
+🌐 Demo Streamlit: [https://housepriceprediction-1450614579.streamlit.app/](https://housepriceprediction-1450614579.streamlit.app/)
 
 ## 📊 Dataset
 
