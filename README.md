@@ -9,5 +9,10 @@ Aplikasi prediksi harga rumah di Amerika Serikat menggunakan model Machine Learn
 - Visualisasi lokasi rumah pada peta.
 - Antarmuka interaktif menggunakan **Streamlit**.
 
+## 🔗 Demo
+
+🌐 Coba aplikasinya langsung di: [https://housepriceprediction-1450614579.streamlit.app/](https://housepriceprediction-1450614579.streamlit.app/)
+
 ## 📊 Dataset
+
 Dataset diambil dari [King County House Sales](https://www.kaggle.com/harlfoxem/housesalesprediction), berisi data penjualan rumah di wilayah Seattle, WA, USA.
