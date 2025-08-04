@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import joblib
 import pydeck as pdk
+import os
+import requests
 
 # Konfigurasi Halaman
 st.set_page_config(
@@ -11,11 +13,28 @@ st.set_page_config(
     initial_sidebar_state="auto"
 )
 
-# Fungsi untuk Memuat Model dan Scaler
+# Fungsi untuk Memuat Model dan Scaler dari GitHub Release
 @st.cache_resource
 def load_model_and_scaler():
-    model = joblib.load("model_rumah.pkl")
-    scaler = joblib.load("scaler_rumah.pkl")
+    model_url = "https://github.com/airamifta/HousePricePrediction/releases/download/v1.0.0/model_rumah.pkl"
+    scaler_url = "https://github.com/airamifta/HousePricePrediction/releases/download/v1.0.0/scaler_rumah.pkl"
+
+    model_path = "model_rumah.pkl"
+    scaler_path = "scaler_rumah.pkl"
+
+    # Download jika belum ada lokal
+    if not os.path.exists(model_path):
+        r = requests.get(model_url)
+        with open(model_path, 'wb') as f:
+            f.write(r.content)
+
+    if not os.path.exists(scaler_path):
+        r = requests.get(scaler_url)
+        with open(scaler_path, 'wb') as f:
+            f.write(r.content)
+
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
     return model, scaler
 
 # Fungsi untuk Prediksi
