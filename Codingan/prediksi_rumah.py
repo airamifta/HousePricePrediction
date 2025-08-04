@@ -116,8 +116,5 @@ if submit_button:
         st.metric("Estimasi Harga (USD)", f"${price_usd:,}")
         st.info(f"Jika dikonversi: **Rp{price_idr:,}** (kurs Rp16.380/USD)")
 
-        st.subheader("📍 Lokasi di Peta")
-        st.map(pd.DataFrame({'lat': [lat], 'lon': [long]}))
-
     except Exception as e:
         st.error(f"Terjadi kesalahan saat prediksi: {e}")
