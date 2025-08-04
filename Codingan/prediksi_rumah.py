@@ -108,36 +108,16 @@ if submit_button:
 
     input_df = pd.DataFrame([input_dict])
 
-    try:
-        estimated_price = predict_price(model, scaler, input_df)
-        estimated_price_idr = estimated_price * 16380  # Konversi ke Rupiah
+   try:
+        price_usd = predict_price(model, scaler, df)
+        price_idr = price_usd * 16380
 
-        st.subheader("Hasil Prediksi Harga Rumah Anda:")
-        st.metric(label="💰 Perkiraan Harga", value=f"${estimated_price:,}")
-        st.info(f"Jika dikonversi, harga ini setara dengan sekitar **Rp{estimated_price_idr:,}** "
-                f"(berdasarkan kurs Rp16.380 per USD).")
+        st.subheader("💰 Perkiraan Harga Rumah")
+        st.metric("Estimasi Harga (USD)", f"${price_usd:,}")
+        st.info(f"Jika dikonversi: **Rp{price_idr:,}** (kurs Rp16.380/USD)")
 
-        # Peta Lokasi
-        st.subheader("📍 Lokasi Rumah di Peta")
-        map_data = pd.DataFrame({'lat': [lat], 'lon': [long]})
-        st.pydeck_chart(pdk.Deck(
-            map_style="mapbox://styles/mapbox/streets-v11",
-            initial_view_state=pdk.ViewState(
-                latitude=lat,
-                longitude=long,
-                zoom=12,
-                pitch=0,
-            ),
-            layers=[
-                pdk.Layer(
-                    "ScatterplotLayer",
-                    data=map_data,
-                    get_position='[lon, lat]',
-                    get_color='[0, 128, 255, 160]',
-                    get_radius=200,
-                ),
-            ],
-        ))
+        st.subheader("📍 Lokasi di Peta")
+        st.map(pd.DataFrame({'lat': [lat], 'lon': [long]}))
 
     except Exception as e:
         st.error(f"Terjadi kesalahan saat prediksi: {e}")
