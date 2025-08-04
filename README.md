@@ -16,3 +16,8 @@ Aplikasi prediksi harga rumah di Amerika Serikat menggunakan model Machine Learn
 ## 📊 Dataset
 
 Dataset diambil dari [King County House Sales](https://www.kaggle.com/harlfoxem/housesalesprediction), berisi data penjualan rumah di wilayah Seattle, WA, USA.
+
+## 📄 Paper Reference
+
+🔗 [Predicting House Prices in the United States using Machine Learning](https://www.atlantis-press.com/proceedings/icfied-22/125971834)  
+*Published in Proceedings of the 12th International Conference on Future Information & Economics Development (ICFIED 2022)*
